@@ -36,7 +36,7 @@ pipeline {
         }
       stage('run docker ') {
             steps {
-                docker run --restart always --name train-schedule -p 8080:8080 -d faisal2019/train-schedule5:${env.BUILD_NUMBER}
+                docker run --restart always --name train-schedule -p 8080:8080 -d faisal2018/train-schedule5
             }
         }
                         
