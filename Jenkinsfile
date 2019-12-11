@@ -34,11 +34,16 @@ pipeline {
                 }
             }
         }
-      stage('run docker ') {
+       stage('Deploy Docker') {
+         
             steps {
-                docker run --restart always --name train-schedule -p 8080:8080 -d faisal2018/train-schedule5
+                
+                    script {
+                        sh "docker pull faisal2018/train-schedule:${env.BUILD_NUMBER}\"
+                       
+                       sh "docker run --restart always --name train-schedule -p 8080:8080 -d faisal2018/train-schedule:${env.BUILD_NUMBER}\"
+                    }
+                }
             }
         }
     }
-}                      
-                   
