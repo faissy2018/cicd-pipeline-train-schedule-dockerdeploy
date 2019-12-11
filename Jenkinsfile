@@ -39,9 +39,9 @@ pipeline {
             steps {
                 
                     script {
-                        sh "docker pull faisal2018/train-schedule:${env.BUILD_NUMBER}"
+                        sh "docker pull faisal2018/train-schedule5:${env.BUILD_NUMBER}"
                        
-                       sh "docker run --restart always --name train-schedule -p 8089:8080 -d faisal2018/train-schedule:${env.BUILD_NUMBER}"
+                       sh "docker run --restart always --name train-schedule5 -p 8089:8080 -d faisal2018/train-schedule5:${env.BUILD_NUMBER}"
                     }
                 }
             }
