@@ -39,7 +39,7 @@ pipeline {
             steps {
                 
                     script {
-                         sh "docker stop faisal2018/train-schedule5"
+                         
                         sh "docker pull faisal2018/train-schedule5:${env.BUILD_NUMBER}"
                         
                        
