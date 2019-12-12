@@ -34,7 +34,7 @@ pipeline {
                 }
             }
         }
-       stage('Deploy Docker') {
+       stage('Deploy Docker final') {
          
             steps {
                 
