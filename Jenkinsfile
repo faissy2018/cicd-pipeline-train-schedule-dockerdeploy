@@ -1,69 +1,75 @@
-def SONARQUBE_HOSTNAME = "sonarqube"
+//START-OF-SCRIPT
+	node {
+	    def SONARQUBE_HOSTNAME = 'sonarqube'
+	
 
+	    def GRADLE_HOME = tool name: 'gradle-4.10.2', type: 'hudson.plugins.gradle.GradleInstallation'
+	    sh "${GRADLE_HOME}/bin/gradle tasks"
+	
+
+	    stage('prep') {
+	        git url: 'https://github.com/cloudacademy/devops-webapp.git'                
+	    }
+	
+
+	    stage('build') {
+	        sh "${GRADLE_HOME}/bin/gradle build"
+	    }
+def dockerImage
+//jenkins needs entrypoint of the image to be empty
+def runArgs = '--entrypoint \'\''
 pipeline {
-    agent any
+    agent {
+        label 'any'
+    }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '100', artifactNumToKeepStr: '20'))
+        timestamps()
+    }
     stages {
         stage('Build') {
-            steps {
-                echo 'Running build automation'
-                sh './gradlew build --no-daemon'
-                archiveArtifacts artifacts: 'dist/trainSchedule.zip'
-            }
-        }
-       stage('Build Docker Image') {
-            when {
-                branch 'master'
-            }
+            options { timeout(time: 30, unit: 'MINUTES') }
             steps {
                 script {
-                    app = docker.build("willbla/train-schedule")
-                    app.inside {
-                        sh 'echo $(curl localhost:8080)'
-                    }
+                    def commit = checkout scm
+                    // we set BRANCH_NAME to make when { branch } syntax work without multibranch job
+                    env.BRANCH_NAME = commit.GIT_BRANCH.replace('origin/', '')
+
+                    dockerImage = docker.build("faisal2018/train-schedule:${env.BUILD_ID}",
+                        "--label \"GIT_COMMIT=${env.GIT_COMMIT}\""
+                        + " --build-arg MY_ARG=myArg"
+                        + " ."
+                    )
                 }
             }
         }
-        stage('Push Docker Image') {
-            when {
-                branch 'master'
-            }
+        stage('Push to docker repository') {
+            when { branch 'master' }
+            options { timeout(time: 5, unit: 'MINUTES') }
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
-                        app.push("${env.BUILD_NUMBER}")
-                        app.push("latest")
-                    }
-                }
-            }
-        }
-            stage('sonar-scanner') {
-    sonarqubeScannerHome = tool name: 'sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-      withCredentials([string(credentialsId: 'sonar', variable: 'sonarLogin')]) {
-        sh "${sonarqubeScannerHome}/bin/sonar-scanner -e -Dsonar.host.url=http://${SONARQUBE_HOSTNAME}:9000 -Dsonar.login=${sonarLogin} -Dsonar.projectName=WebApp -Dsonar.projectVersion=${env.BUILD_NUMBER} -Dsonar.projectKey=GS -Dsonar.sources=src/main/ -Dsonar.tests=src/test/ -Dsonar.java.binaries=build/**/* -Dsonar.language=java"
-      }
-        }
-        
-        stage('DeployToProduction') {
-            when {
-                branch 'master'
-            }
-            steps {
-                input 'Deploy to Production?'
-                milestone(1)
-                withCredentials([usernamePassword(credentialsId: 'webserver_login', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
+                lock("${JOB_NAME}-Push") {
                     script {
-                        sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker pull faisal2018/train-schedule:${env.BUILD_NUMBER}\""
-                        try {
-                            sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker stop train-schedule\""
-                            sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker rm train-schedule\""
-                        } catch (err) {
-                            echo: 'caught error: $err'
+                        docker.withRegistry('https://myrepo:5000', 'docker_registry') {
+                            dockerImage.push('latest')
                         }
-                        sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker run --restart always --name train-schedule -p 8080:8080 -d faisal2018/train-schedule:${env.BUILD_NUMBER}\""
                     }
+                    milestone 30
                 }
             }
         }
     }
+stage('sonar-scanner') {
+	      def sonarqubeScannerHome = tool name: 'sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+	      withCredentials([string(credentialsId: 'sonar', variable: 'sonarLogin')]) {
+	        sh "${sonarqubeScannerHome}/bin/sonar-scanner -e -Dsonar.host.url=http://${SONARQUBE_HOSTNAME}:9000 -Dsonar.login=${sonarLogin} -Dsonar.projectName=WebApp -Dsonar.projectVersion=${env.BUILD_NUMBER} -Dsonar.projectKey=GS -Dsonar.sources=src/main/ -Dsonar.tests=src/test/ -Dsonar.java.binaries=build/**/* -Dsonar.language=java"
+	      }
+	    }
+	
+
+	}
+	//END-OF-SCRIPT
+
 }
+
+
 
