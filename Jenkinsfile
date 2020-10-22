@@ -15,22 +15,19 @@
 	    stage('build') {
 	        sh "${GRADLE_HOME}/bin/gradle build"
 	    }
-		node {
-    checkout scm
-
+		stage ('docker build'){
     def customImage = docker.build("faisal2018/train-schedule:${env.BUILD_ID}")
 
     customImage.inside {
         sh 'make test'
     }
 }
-
-node {
-    checkout scm
+stage ('docker build'){
 	docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login')
     def customImage = docker.build("faisal2018/train-schedule:${env.BUILD_ID}")
     customImage.push()
 }
+	}
 
 stage('sonar-scanner') {
 	      def sonarqubeScannerHome = tool name: 'sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
