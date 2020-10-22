@@ -10,13 +10,13 @@ pipeline {
                 archiveArtifacts artifacts: 'dist/trainSchedule.zip'
             }
         }
-        stage('Build Docker Image') {
+       stage('Build Docker Image') {
             when {
                 branch 'master'
             }
             steps {
                 script {
-                    app = docker.build("faisal2018/train-schedule")
+                    app = docker.build("willbla/train-schedule")
                     app.inside {
                         sh 'echo $(curl localhost:8080)'
                     }
@@ -35,7 +35,7 @@ pipeline {
                     }
                 }
             }
-            
+        }
             stage('sonar-scanner') {
       def sonarqubeScannerHome = tool name: 'sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
       withCredentials([string(credentialsId: 'sonar', variable: 'sonarLogin')]) {
