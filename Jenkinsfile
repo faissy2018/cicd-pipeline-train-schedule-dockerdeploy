@@ -1,3 +1,4 @@
+def myVariable = "18.224.66.87"
 pipeline {
     agent any
     stages {
@@ -14,7 +15,7 @@ pipeline {
             }
             steps {
                 script {
-                    app = docker.build("willbla/train-schedule")
+                    app = docker.build("faisal2018/train-schedule")
                     app.inside {
                         sh 'echo $(curl localhost:8080)'
                     }
@@ -38,7 +39,7 @@ pipeline {
     environment {
         scannerHome = tool 'sonar'
     }    steps {
-    withCredentials([string(credentialsId: 'sonar', variable: 'sonarLogin')]) {
+    withCredentials([string(credentialsId: 'JenkinsSonarqube', variable: 'sonarLogin')]) {
 	        sh "${sonarqubeScannerHome}/bin/sonar-scanner -e -Dsonar.host.url=http://${SONARQUBE_HOSTNAME}:9000 -Dsonar.login=${sonarLogin} -Dsonar.projectName=WebApp -Dsonar.projectVersion=${env.BUILD_NUMBER} -Dsonar.projectKey=GS -Dsonar.sources=src/main/ -Dsonar.tests=src/test/ -Dsonar.java.binaries=build/**/* -Dsonar.language=java"
 	      }
 	    }
