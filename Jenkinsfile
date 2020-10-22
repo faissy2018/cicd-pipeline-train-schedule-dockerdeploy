@@ -37,8 +37,7 @@ stage('sonar-scanner') {
 	    }
 	
 
-	}
-	//END-OF-SCRIPT
+
 
 
 
