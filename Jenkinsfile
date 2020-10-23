@@ -1,4 +1,4 @@
-def myVariable = "18.224.66.87"
+def myVariable = "18.221.17.17"
 pipeline {
     agent any
     stages {
