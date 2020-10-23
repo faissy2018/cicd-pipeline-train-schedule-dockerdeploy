@@ -10,8 +10,7 @@ pipeline {
         }
  stage('Building image') {
 steps{
-script {
-dockerImage = docker.build faisal2018/test345
+script {   app = docker.build("faisal2018/testpipeline")
 }
 }
 }
