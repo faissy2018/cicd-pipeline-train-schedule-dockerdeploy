@@ -33,10 +33,10 @@ pipeline {
                         app.push("latest")
                     }
                 }
-                      stage('Sonarqube') {
+        stage('Sonarqube') {
     environment {
-        scannerHome = tool 'Sonarqube4'
-    }   
+        scannerHome = tool 'SonarQube4'
+    }
 	      steps {
     withCredentials([string(credentialsId: 'JenkinsSonarqube', variable: 'sonarLogin')]) {
 	        sh "${scannerHome}/bin/sonar-scanner -e -Dsonar.host.url=http://18.221.17.17/:9000 -Dsonar.login=${sonarLogin} -Dsonar.projectName=WebApp -Dsonar.projectVersion=${env.BUILD_NUMBER} -Dsonar.projectKey=GS -Dsonar.sources=src/main/ -Dsonar.tests=src/test/ -Dsonar.java.binaries=build/**/* -Dsonar.language=java"}
