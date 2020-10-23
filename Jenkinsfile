@@ -8,11 +8,18 @@ pipeline {
                 archiveArtifacts artifacts: 'dist/trainSchedule.zip'
             }
         }
- stage('Building image') {
-steps{
-script {   app = docker.build("faisal2018/testpipeline")
-}
-}
-}
+stage('Build Docker Image') {
+            when {
+                branch 'example-solution'
+            }
+            steps {
+                script {
+                    app = docker.build("willbla/train-schedule")
+                    app.inside {
+                        sh 'echo $(curl localhost:8080)'
+                    }
+                }
+            }
+        }
     }
 }
