@@ -1,4 +1,3 @@
-def myVariable = "18.221.17.17"
 pipeline {
     agent any
     stages {
@@ -9,35 +8,5 @@ pipeline {
                 archiveArtifacts artifacts: 'dist/trainSchedule.zip'
             }
         }
-        stage('Build Docker Image') {
-	       steps {
-                script {
-                    app = docker.build("faisal2018/train-schedule")
-                    app.inside {
-                        sh 'echo $(curl localhost:8080)'
-                    }
-                }
-            }
-        }
-        stage('Push Docker Image') {
-		steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
-                        app.push("${env.BUILD_NUMBER}")
-                        app.push("latest")
-                    }
-                }
-            }
-        }
-      stage('Sonarqube') {
-    environment {
-        scannerHome = tool 'Sonarqube4'
-    }   
-	      steps {
-    withCredentials([string(credentialsId: 'JenkinsSonarqube', variable: 'sonarLogin')]) {
-	        sh "${scannerHome}/bin/sonar-scanner -e -Dsonar.host.url=http://${SONARQUBE_HOSTNAME}:9000 -Dsonar.login=${sonarLogin} -Dsonar.projectName=WebApp -Dsonar.projectVersion=${env.BUILD_NUMBER} -Dsonar.projectKey=GS -Dsonar.sources=src/main/ -Dsonar.tests=src/test/ -Dsonar.java.binaries=build/**/* -Dsonar.language=java"}
-	      }
-	    }
-      }
     }
-
+}
