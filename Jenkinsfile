@@ -9,10 +9,7 @@ pipeline {
             }
         }
           stage('Build Docker Image') {
-            when {
-                branch 'master'
-            }
-            steps {
+             steps {
                 script {
                     app = docker.build("willbla/train-schedule")
                     app.inside {
