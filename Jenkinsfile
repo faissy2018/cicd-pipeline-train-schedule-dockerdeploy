@@ -33,8 +33,6 @@ pipeline {
                         app.push("latest")
                     }
                 }
-      stage('Sonarqube') {
- 
-
+    
 }
     }
