@@ -8,6 +8,12 @@ pipeline {
                 archiveArtifacts artifacts: 'dist/trainSchedule.zip'
             }
         }
- 
+ stage('Building image') {
+steps{
+script {
+dockerImage = docker.build faisal2018/test345
+}
+}
+}
     }
 }
