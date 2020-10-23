@@ -37,7 +37,7 @@ pipeline {
         }
       stage('Sonarqube') {
     environment {
-        scannerHome = tool 'sonarqube'
+        scannerHome = tool 'Sonarqube4'
     }   
 	      steps {
     withCredentials([string(credentialsId: 'JenkinsSonarqube', variable: 'sonarLogin')]) {
