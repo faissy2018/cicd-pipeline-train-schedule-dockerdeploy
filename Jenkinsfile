@@ -10,10 +10,7 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
-		  when {
-                branch 'master'
-            }
-                       steps {
+	       steps {
                 script {
                     app = docker.build("faisal2018/train-schedule")
                     app.inside {
@@ -23,10 +20,7 @@ pipeline {
             }
         }
         stage('Push Docker Image') {
-		  when {
-                branch 'master'
-            }
-                    steps {
+		steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker_hub_login') {
                         app.push("${env.BUILD_NUMBER}")
@@ -41,7 +35,7 @@ pipeline {
     }   
 	      steps {
     withCredentials([string(credentialsId: 'JenkinsSonarqube', variable: 'sonarLogin')]) {
-	        sh "${sonarqubeScannerHome}/bin/sonar-scanner -e -Dsonar.host.url=http://${SONARQUBE_HOSTNAME}:9000 -Dsonar.login=${sonarLogin} -Dsonar.projectName=WebApp -Dsonar.projectVersion=${env.BUILD_NUMBER} -Dsonar.projectKey=GS -Dsonar.sources=src/main/ -Dsonar.tests=src/test/ -Dsonar.java.binaries=build/**/* -Dsonar.language=java"
+	        sh "${scannerHome}/bin/sonar-scanner"/bin/sonar-scanner -e -Dsonar.host.url=http://${SONARQUBE_HOSTNAME}:9000 -Dsonar.login=${sonarLogin} -Dsonar.projectName=WebApp -Dsonar.projectVersion=${env.BUILD_NUMBER} -Dsonar.projectKey=GS -Dsonar.sources=src/main/ -Dsonar.tests=src/test/ -Dsonar.java.binaries=build/**/* -Dsonar.language=java"
 	      }
 	    }
       }
